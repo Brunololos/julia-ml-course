@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.1
 
 using Markdown
 using InteractiveUtils
@@ -7,14 +7,7 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     quote
-        local iv = try
-            Base.loaded_modules[Base.PkgId(
-                Base.UUID("6e696c72-6542-2067-7265-42206c756150"),
-                "AbstractPlutoDingetjes",
-            )].Bonds.initial_value
-        catch
-            b -> missing
-        end
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
         el
@@ -60,9 +53,9 @@ md"### Student information"
 
 # ╔═╡ d03e4e95-faab-4ab3-ab27-81189cbd8231
 student = (
-    name="Mara Mustermann",
-    email="m.mustermann@campus.tu-berlin.de", # TU Berlin email address
-    id=456123, # Matrikelnummer
+    name="Andreas Paul Bruno Lönne",
+    email="loenne@campus.tu-berlin.de", # TU Berlin email address
+    id=402214, # Matrikelnummer
 )
 
 # ╔═╡ ff5d316f-806c-4652-97d8-323462395c69
@@ -124,19 +117,19 @@ task("Define variables such that their type matches the given variable name.
 You can give the variables any value you want.", 0.5)
 
 # ╔═╡ b96fde59-1f2a-4d07-a5cc-6ec48e5079f1
-my_string = missing # replace `missing` with your code!
+my_string = "Queen_Anne's_Revenge"
 
 # ╔═╡ 12faf3e9-4380-430c-aedf-25380558b09a
-my_int = missing
+my_int = 279
 
 # ╔═╡ 9d20c79d-4f97-4a39-ac1a-eed311a6149a
-my_float64 = missing
+my_float64 = 279.0
 
 # ╔═╡ d9a237b0-c112-4ee2-9232-725ce97679dc
-my_float32 = missing
+my_float32 = Float32(279.0)
 
 # ╔═╡ b8e741c9-feff-4017-a037-0fbd9cd4f49a
-my_complex = missing
+my_complex = 279 + 5im
 
 # ╔═╡ 2001c0fb-e4cd-49d6-b305-429c0597bad2
 # my_string
@@ -197,22 +190,22 @@ Fix each expression by broadcasting.
 This only requires **adding a single dot** (`.`) to each line.""", 0.5)
 
 # ╔═╡ c84be3a2-73a9-42f1-bf6b-3fbf64258cf5
-my_square_roots = sqrt([4, 9, 16])
+my_square_roots = sqrt.([4, 9, 16])
 
 # ╔═╡ a11ccc2b-3c5b-493a-8e8b-8b46b44bd3a4
-my_favorite_primes = [7, 12, 18] - 5
+my_favorite_primes = [7, 12, 18] .- 5
 
 # ╔═╡ 6a1c553d-66ef-42da-83ad-5b46a7e4c58b
 md"Before you fix the following expressions, think about what you expect them to return!"
 
 # ╔═╡ 6eaffea6-099d-441e-b54b-f08bc9b478c7
-my_broadcast_1 = 2^(1:8)
+my_broadcast_1 = 2 .^ (1:8)
 
 # ╔═╡ a87612a8-62dd-44d4-89c4-c712870b00c3
-my_broadcast_2 = (1:8)^2
+my_broadcast_2 = (1:8) .^ 2
 
 # ╔═╡ da70e426-ea78-4969-9402-efffd5576238
-my_broadcast_3 = (1:8)^(1:8)
+my_broadcast_3 = (1:8) .^ (1:8)
 
 # ╔═╡ 35f59a25-0ab4-4c18-82c8-466fdeeb3471
 # my_square_roots
@@ -255,7 +248,7 @@ task("Define `my_types` such that it is a vector of the types in `my_vars`.", 0.
 my_vars = [1.3, 'b', 3, im, "String", 2//3]
 
 # ╔═╡ f190cbbb-24e7-4c83-b7fb-9477ccdb5023
-my_types = missing  # should be equal to types in `my_vars`
+my_types = typeof.(my_vars) #[typeof(x) for x in my_vars]
 
 # ╔═╡ a4b05061-e48e-4dbb-aa1c-df242c5b2785
 if !@isdefined(my_types)
@@ -295,8 +288,8 @@ task(
 
 # ╔═╡ 49e6ab33-9452-4dc1-ac59-d47e70c325a5
 function smaller(a, b)
-    # Write your code here!
-    return missing
+	if a <= b return a end #a <= b && return a
+	return b
 end
 
 # ╔═╡ ffbd5d8c-86f9-4c5d-9d9c-1d1a0083a439
@@ -340,8 +333,11 @@ task(
 
 # ╔═╡ f54461c4-392c-4a83-933c-d30a41ce4e0e
 function my_sum(xs)
-    # Write your code here!
-    return missing
+    sum = 0
+	for x in xs
+		sum += x
+	end
+    return sum
 end
 
 # ╔═╡ bcb0ff95-f769-46f3-abf3-d5807107413b
@@ -387,8 +383,7 @@ function my_powers(x, ymax::Int)
     # You don't have to change this line:
     ymax < 1 && error("ymax has to be larger or equal 1.")
 
-    # but you have to write code here!
-    return missing
+    return [x^y for y in 1:ymax]
 end
 
 # ╔═╡ b74c95c2-db7a-4a72-b7c6-3e6644d90158
@@ -496,8 +491,7 @@ You can reuse `my_sum`.
 
 # ╔═╡ bae3ffd7-2d9a-4450-9f5e-6b7c296529d5
 function my_mean(xs)
-    # Write your code here!
-    return missing
+    return my_sum(xs)/length(xs)
 end
 
 # ╔═╡ 31ac70a3-2dcc-497f-a996-81e087615b0f
@@ -535,8 +529,12 @@ $\sigma(x) = \sqrt{\frac{1}{n-1}\sum_{i=1}^{n} \left(x_i - \mu\right)^2}$
 
 # ╔═╡ 2af1806e-c9af-4616-a654-9b0d52a08c65
 function my_std(xs)
-    # Write your code here!
-    return missing
+	normalisation = length(xs) - 1
+	centered = xs .- my_mean(xs)
+	squared = centered .^ 2
+	sum = my_sum(squared)
+	
+    return sqrt(sum/normalisation)
 end
 
 # ╔═╡ 041fe618-588e-4fb6-b1d5-455a7d8bdf6f
@@ -576,8 +574,9 @@ task("Implement a function `standardize(xs)` that standardizes a vector.", 2)
 
 # ╔═╡ 5d080901-92f2-45d5-8603-3fc8e90137e0
 function standardize(xs)
-    # Write your code here!
-    return missing
+	mean = my_mean(xs)
+	stddev = my_std(xs)
+    return (xs .- mean) ./ stddev
 end
 
 # ╔═╡ ac830b8f-9ca5-4a86-981f-e9953700a6b0
@@ -641,16 +640,15 @@ task(
 
 # ╔═╡ cce72fb1-b694-4b84-9cc6-e209acd398db
 function get_transformations(data)
-    # Write code here!
+    mean = my_mean(data)
+	stddev = my_std(data)
 
     function transform(xs)
-        # Write code here!
-        return xs
+        return (xs .- mean) ./ stddev
     end
 
     function inverse_transform(xs)
-        # Write code here!
-        return xs
+        return (xs .* stddev) .+ mean
     end
 
     return transform, inverse_transform # don't change this line
@@ -711,17 +709,18 @@ You can write whatever you want in the following string. Feel free to add or del
 
 # ╔═╡ f60be2e0-9b43-46b5-96ef-7747ab56e164
 feedback = """
-The homework took me around XX minutes.
+The homework took me around 30-40 minutes. (including julia setup & browsing/reading the documentation)
 
 In the lecture / homework I would have liked more detailed explanations on:
 * foo
 * bar
 
 I liked:
-* baz
+* being allowed to reuse previously defined function (not having to retype them each cell)
+* the broadcasting operator
 
 I didn't like:
-* qux
+* shortcircuiting. I consider it to be less clear than a simple if statement, which can also be written in one line.
 """;
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
