@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.1
 
 using Markdown
 using InteractiveUtils
@@ -7,14 +7,7 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     quote
-        local iv = try
-            Base.loaded_modules[Base.PkgId(
-                Base.UUID("6e696c72-6542-2067-7265-42206c756150"),
-                "AbstractPlutoDingetjes",
-            )].Bonds.initial_value
-        catch
-            b -> missing
-        end
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
         el
@@ -62,9 +55,9 @@ md"### Student information"
 
 # ╔═╡ d03e4e95-faab-4ab3-ab27-81189cbd8231
 student = (
-    name="Mara Mustermann",
-    email="m.mustermann@campus.tu-berlin.de", # TU Berlin email address
-    id=456123, # Matrikelnummer
+    name="Andreas Paul Bruno Lönne",
+    email="loenne@campus.tu-berlin.de", # TU Berlin email address
+    id=402214, # Matrikelnummer
 )
 
 # ╔═╡ ff5d316f-806c-4652-97d8-323462395c69
@@ -126,9 +119,10 @@ task(
 hello = "Hello World!"
 
 # ╔═╡ cb871521-e3d8-4b87-a474-b45b5c8167a9
-second_letter = missing # second character in `hello_world`
+second_letter = hello[2] # second character in `hello_world`
 
 # ╔═╡ 5e70263e-6512-40ef-ad0a-38287dfba684
+
 if !@isdefined(second_letter)
     not_defined(:second_letter)
 else
@@ -142,7 +136,7 @@ else
 end
 
 # ╔═╡ 11df83bc-cb8e-4782-89f4-8abb73803621
-first_five = missing # first five characters in `hello_world`
+first_five = hello[1:5] # first five characters in `hello_world`
 
 # ╔═╡ b3d54500-daab-4360-943d-30997c90aa02
 if !@isdefined(first_five)
@@ -158,7 +152,7 @@ else
 end
 
 # ╔═╡ fed6823a-bd16-4efd-804c-58dd5a2339ef
-last_six = missing # last six characters in `hello_world`
+last_six = hello[end-5:end] # last six characters in `hello_world`
 
 # ╔═╡ e6db1935-af93-4850-acfe-92cec4de4fed
 hint(md"Try to make use of `end`.")
@@ -177,7 +171,7 @@ else
 end
 
 # ╔═╡ 7d81c2cb-5ce2-4a25-96f4-66688863bb54
-seven_to_eleven = missing # seventh to eleventh characters in `hello_world`
+seven_to_eleven = hello[7:11] # seventh to eleventh characters in `hello_world`
 
 # ╔═╡ 7adeed1a-70d7-45c4-99e1-9be23bbbeb86
 if !@isdefined(seven_to_eleven)
@@ -254,7 +248,8 @@ You can assume that the image is a regular Matrix using 1-based indexing.
 
 # ╔═╡ 15fe42c4-9262-4673-b1b8-f417de0271d9
 function my_crop(img)
-    return missing # Replace `missing` with your code
+	img_w = size(img)[2]
+    return @view img[:, end - (img_w ÷ 2) + 1:end]
 end
 
 # ╔═╡ 9f137e55-ff39-4b95-b501-78921c27f4db
@@ -262,6 +257,9 @@ md"Don't forget that you can add cells with your own tests here!"
 
 # ╔═╡ 4c3b1036-f530-43de-83e2-91ef962a86d6
 my_crop([1 2 3 4; 5 6 7 8])
+
+# ╔═╡ b1f7b99b-8418-4579-8c9e-4dcb80145188
+my_crop([1 4 7 10 13; 2 5 8 11 14; 3 6 9 12 15])
 
 # ╔═╡ 377fa7fd-f4a0-46a3-9511-d52155981cb9
 if !@isdefined(my_crop)
@@ -348,7 +346,9 @@ For this purpose:
 
 # ╔═╡ ec262620-a818-4f5c-b6b9-24a58b73a603
 function rank_n_approx(A, n)
-    return missing # Replace `missing` with your code
+	U, Σ, V = svd(A)
+	(@view Σ[n+1:end]) .= 0
+    return U * Diagonal(Σ) * V'
 end
 
 # ╔═╡ 81a85548-ccf0-4d09-9cdf-f6eefc08017a
@@ -459,40 +459,8 @@ Use the RBF kernel with $\sigma=0.5$.",
     0.5,
 )
 
-# ╔═╡ 45d51447-beb8-4682-8b09-f65de7cfb95a
-kXX = missing # Replace `missing` with your code
-
 # ╔═╡ 776d80f1-ea26-4aeb-8bd5-c230956fa724
 md"Since kernel functions $k$ are symmetric and positive-definite, this should also apply to the matrix $K$:"
-
-# ╔═╡ 5774bd94-3c87-48b5-868e-73418afbb5c7
-issymmetric(kXX)
-
-# ╔═╡ 23227a0e-413a-4e05-9bf2-109a499b12cb
-isposdef(kXX)
-
-# ╔═╡ 5eea7d2e-cfda-4b42-9697-31ef645a1a79
-if !@isdefined(kXX)
-    not_defined(:kXX)
-else
-    if ismissing(kXX)
-        still_missing()
-    elseif isnothing(kXX)
-        keep_working(md"`kXX` is `nothing`.")
-    elseif typeof(kXX) != Matrix{Float64}
-        keep_working(md"`kXX` should be of type `Matrix{Float64}`.")
-    elseif size(kXX) != (10, 10)
-        keep_working(md"`kXX` should be of size (10, 10), got $(size(kXX)).")
-    elseif !issymmetric(kXX)
-        keep_working(md"`kXX` should be a symmetric matrix.")
-    elseif !isposdef(kXX)
-        keep_working(md"`kXX` should be a positive-definite matrix.")
-    elseif !(sum(kXX) ≈ 70.69205369179959)
-        keep_working(md"Did you use $\sigma=0.5$?")
-    else
-        correct()
-    end
-end
 
 # ╔═╡ ce97f41f-8b71-468f-bac3-39a66e440cd5
 hint(md"There are several viable approaches:
@@ -516,26 +484,6 @@ where $x_i$ is the $i$-th entry in the dataset $X$. Use $\hat{x}=0.8$ and the RB
 ",
     0.5,
 )
-
-# ╔═╡ f9906c93-f96d-45fd-b0ae-48794d82d54e
-kxX = missing # Replace `missing` with your code
-
-# ╔═╡ 58dd630a-ed1b-471a-94a3-fea43ec41d19
-if !@isdefined(kxX)
-    not_defined(:kxX)
-else
-    if ismissing(kxX)
-        still_missing()
-    elseif isnothing(kxX)
-        keep_working(md"`kxX` is `nothing`.")
-    elseif size(kxX) != (1, 10)
-        keep_working(md"`kxX` should be of size (1, 10), got $(size(kxX)).")
-    elseif !(sum(kxX) ≈ 6.966497082632841)
-        keep_working(md"Did you use $\hat{x}=0.8$ and $\sigma=0.5$?")
-    else
-        correct()
-    end
-end
 
 # ╔═╡ de0a1efb-77ae-45bd-83a5-77029e2b095d
 hint(md"There are several viable approaches:
@@ -647,7 +595,9 @@ md"### Interactive plot"
 
 # ╔═╡ 74d0409d-8a10-4660-8a01-c75505f612e2
 function rbf(xi, xj; σ=σ_slider) # Don't change this line
-    return missing # Replace `missing` with your code
+	vec_diff = xi - xj
+	diff_norm = vec_diff' * vec_diff
+    return exp(-diff_norm/(2(σ^2)))
 end
 
 # ╔═╡ 05032f1b-ca1e-4fb0-ae21-060c06146871
@@ -671,12 +621,69 @@ else
     end
 end
 
+# ╔═╡ 45d51447-beb8-4682-8b09-f65de7cfb95a
+kXX = [rbf(X[x], X[y], σ=0.5) for x in 1:size(X, 1), y in 1:size(X, 1)]
+
+# ╔═╡ 5774bd94-3c87-48b5-868e-73418afbb5c7
+issymmetric(kXX)
+
+# ╔═╡ 23227a0e-413a-4e05-9bf2-109a499b12cb
+isposdef(kXX)
+
+# ╔═╡ 5eea7d2e-cfda-4b42-9697-31ef645a1a79
+if !@isdefined(kXX)
+    not_defined(:kXX)
+else
+    if ismissing(kXX)
+        still_missing()
+    elseif isnothing(kXX)
+        keep_working(md"`kXX` is `nothing`.")
+    elseif typeof(kXX) != Matrix{Float64}
+        keep_working(md"`kXX` should be of type `Matrix{Float64}`.")
+    elseif size(kXX) != (10, 10)
+        keep_working(md"`kXX` should be of size (10, 10), got $(size(kXX)).")
+    elseif !issymmetric(kXX)
+        keep_working(md"`kXX` should be a symmetric matrix.")
+    elseif !isposdef(kXX)
+        keep_working(md"`kXX` should be a positive-definite matrix.")
+    elseif !(sum(kXX) ≈ 70.69205369179959)
+        keep_working(md"Did you use $\sigma=0.5$?")
+    else
+        correct()
+    end
+end
+
+# ╔═╡ f9906c93-f96d-45fd-b0ae-48794d82d54e
+kxX = [rbf(0.8, X[x], σ=0.5) for x in 1:size(X, 1)]'
+
+# ╔═╡ 58dd630a-ed1b-471a-94a3-fea43ec41d19
+if !@isdefined(kxX)
+    not_defined(:kxX)
+else
+    if ismissing(kxX)
+        still_missing()
+    elseif isnothing(kxX)
+        keep_working(md"`kxX` is `nothing`.")
+    elseif size(kxX) != (1, 10)
+        keep_working(md"`kxX` should be of size (1, 10), got $(size(kxX)).")
+    elseif !(sum(kxX) ≈ 6.966497082632841)
+        keep_working(md"Did you use $\hat{x}=0.8$ and $\sigma=0.5$?")
+    else
+        correct()
+    end
+end
+
 # ╔═╡ b5d7850d-dac2-482e-b0bc-273660d0646a
 function kernel_ridge(X, y; kernel=rbf, λ=1e-8)  # Don't change this line
-    # Write your code here
+	samples = size(X, 1)
+    kXX = [kernel(X[x], X[y]) for x in 1:samples, y in 1:samples]
+	kXX = kXX + I*λ
+	C = cholesky(kXX)
+	α = C \ y
 
     function predict(xtest::Real)
-        return missing # Replace `missing` with your code
+		kxX = [kernel(xtest, X[x]) for x in 1:samples]'
+        return kxX * α
     end
 
     return predict # Don't change this line
@@ -789,16 +796,22 @@ task(
 
 # ╔═╡ 9f99e017-08f6-43b9-9db8-cec9e310b4b7
 function trace(A::AbstractMatrix)  # Don't change this line
-    # Write your code here
+	🐧 = min(size(A, 1), size(A, 2))
+    🥖 = ones(🐧)
+	🤓 = @view A[1:🐧, 1:🐧]
+	🥸 = diag(🤓)
 
-    return missing
+    return 🥖' * 🥸
 end
 
 # ╔═╡ f6a2038a-9b42-4580-a61d-89c6a398ee66
 function trace(A::Diagonal)  # Don't change this line
-    # Write your code here
+    🐧 = min(size(A, 1), size(A, 2))
+    🥖 = ones(🐧)
+	🤓 = @view A[1:🐧, 1:🐧]
+	🥸 = diag(🤓)
 
-    return missing
+    return 🥖' * 🥸
 end
 
 # ╔═╡ 65b736a4-1a38-4366-b519-cd13893d24a5
@@ -806,6 +819,12 @@ trace(A₁)
 
 # ╔═╡ 5b4773c3-fcbc-4f97-8684-653fd8f1dfbd
 trace(A₂)
+
+# ╔═╡ 74cd0f3d-51dd-4e0a-91cd-9dd21a963b07
+R = rand(3, 3)
+
+# ╔═╡ 83fbfc38-f349-4d6c-913c-249500a1fa33
+trace(R)
 
 # ╔═╡ 68e50ed7-c17d-4d89-9eb6-40aa790a87e8
 if !@isdefined(trace)
@@ -911,9 +930,14 @@ Calculate the projection $H = W_k^T \hat{X}$ of the mean-centered data $\hat{X}$
 
 # ╔═╡ 216dcbf9-91aa-40fe-bef2-6dea56a35be7
 function pca(X, k=2)  # Don't change this line
-    # Write your code here
-    Wk = missing
-    H = missing
+	n = size(X, 2)
+    d = size(X, 1)
+	μ = mean(X, dims=2)
+	X̂ = X .- μ
+	C = X̂ * X̂'
+	vals, vecs = eigen(C)
+    Wk = vecs[:, end:-1:end-k+1]
+    H = Wk' * X̂
     return Wk, H # Don't change this line
 end
 
@@ -985,17 +1009,15 @@ You can write whatever you want in the following string. Feel free to add or del
 
 # ╔═╡ f60be2e0-9b43-46b5-96ef-7747ab56e164
 feedback = """
-The homework took me around XX minutes.
+The homework took me around 120-150 minutes.
 
 In the lecture / homework I would have liked more detailed explanations on:
-* foo
-* bar
+* I found the material easily digestible.
 
 I liked:
-* baz
+* the interactive implementation tests, plotting and easy to understand explanations
 
 I didn't like:
-* qux
 """;
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -2795,7 +2817,7 @@ version = "1.4.1+1"
 # ╟─e5670193-6221-49c6-a880-d287f717545e
 # ╠═a4bb8383-1238-411e-b697-ed258d3c0c6d
 # ╠═cb871521-e3d8-4b87-a474-b45b5c8167a9
-# ╟─5e70263e-6512-40ef-ad0a-38287dfba684
+# ╠═5e70263e-6512-40ef-ad0a-38287dfba684
 # ╠═11df83bc-cb8e-4782-89f4-8abb73803621
 # ╟─b3d54500-daab-4360-943d-30997c90aa02
 # ╠═fed6823a-bd16-4efd-804c-58dd5a2339ef
@@ -2816,6 +2838,7 @@ version = "1.4.1+1"
 # ╠═15fe42c4-9262-4673-b1b8-f417de0271d9
 # ╟─9f137e55-ff39-4b95-b501-78921c27f4db
 # ╠═4c3b1036-f530-43de-83e2-91ef962a86d6
+# ╠═b1f7b99b-8418-4579-8c9e-4dcb80145188
 # ╟─377fa7fd-f4a0-46a3-9511-d52155981cb9
 # ╟─7f8b9940-9ebf-4d93-a76c-1e055c733122
 # ╠═d5ebd2a3-8067-479c-bd9d-6e9c7c55972e
@@ -2899,6 +2922,8 @@ version = "1.4.1+1"
 # ╠═f6a2038a-9b42-4580-a61d-89c6a398ee66
 # ╠═65b736a4-1a38-4366-b519-cd13893d24a5
 # ╠═5b4773c3-fcbc-4f97-8684-653fd8f1dfbd
+# ╠═74cd0f3d-51dd-4e0a-91cd-9dd21a963b07
+# ╠═83fbfc38-f349-4d6c-913c-249500a1fa33
 # ╟─68e50ed7-c17d-4d89-9eb6-40aa790a87e8
 # ╟─41a7bd3b-56f5-45e7-ac8d-313bb3a46181
 # ╟─067c7894-2e3f-43de-998f-4f1a250bc0f7

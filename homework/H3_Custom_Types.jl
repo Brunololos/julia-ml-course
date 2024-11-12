@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.1
 
 using Markdown
 using InteractiveUtils
@@ -22,7 +22,7 @@ begin
 
     using LaTeXStrings
     using Plots
-    using PlotlyBase, PlotlyKaleido
+    import PlotlyBase, PlotlyKaleido
     plotly()
 end
 
@@ -55,9 +55,9 @@ md"### Student information"
 
 # ╔═╡ d03e4e95-faab-4ab3-ab27-81189cbd8231
 student = (
-    name="Mara Mustermann",
-    email="m.mustermann@campus.tu-berlin.de", # TU Berlin email address
-    id=456123, # Matrikelnummer
+    name="Andreas Paul Bruno Lönne",
+    email="loenne@campus.tu-berlin.de", # TU Berlin email address
+    id=402214, # Matrikelnummer
 )
 
 # ╔═╡ ff5d316f-806c-4652-97d8-323462395c69
@@ -189,7 +189,28 @@ You are allowed to use the `mean` and `std` functions from the standard library 
 )
 
 # ╔═╡ aaea0bbf-868d-4fe0-b348-307449d06517
-# Write your code here!
+begin
+	struct Standardize{T<:Real}
+		μ::T
+		σ::T
+
+		function Standardize(μ::T, σ::T) where T
+			if σ <= 0
+				throw()
+			end
+			return new{T}(μ, σ)
+		end
+	end
+
+	function Standardize(data::Array)
+		μ = mean(data)
+		σ = std(data)
+		return Standardize(μ, σ)
+	end
+end
+
+# ╔═╡ dc1968d4-5367-4dea-ae99-a0ed02418205
+Standardize(0.5, 4.0)
 
 # ╔═╡ 80c5a262-e758-4075-896f-a0bc7ce1534c
 md"Let's see if our code works:"
@@ -265,12 +286,12 @@ $X = \left(X' \cdot \sigma\right) + \mu \quad .$
 
 # ╔═╡ bb0d58f9-380e-43fa-9524-0108a2816884
 function transform(xs, dt::Standardize)
-    return missing # Replace `missing` with your code!
+    return (xs .-dt.μ) ./dt.σ
 end
 
 # ╔═╡ 221fd504-4cd6-4bab-b2a5-a590fff26a52
 function inverse_transform(xs, dt::Standardize)
-    return missing # Replace `missing` with your code!
+    return (xs .* dt.σ) .+ dt.μ
 end
 
 # ╔═╡ dcbf8963-4a5c-4e7d-81a9-3dce27fb3117
@@ -462,7 +483,15 @@ task(
 )
 
 # ╔═╡ 58a671a1-3059-4fa9-b758-f3a76a573aa5
-# Write your code here
+begin
+	struct GradientDescent{T<:Real} <: AbstractRule
+		lr::T
+
+		GradientDescent(number) = new{Real}(number)
+	end
+
+	GradientDescent() = GradientDescent(0.1)
+end
 
 # ╔═╡ 6d5bf1e5-5ab0-4351-89d0-ddb6fcfa27b6
 if !@isdefined(GradientDescent)
@@ -496,7 +525,9 @@ task(md"Define an `Optimisers.init` function for `GradientDescent` that returns 
 We return `nothing` since gradient descent doesn't require a state.")
 
 # ╔═╡ 5dc7d04d-f6a5-4265-b890-d74ea4b3c602
-# Write your code here
+function Optimisers.init(alg::GradientDescent, params_init::AbstractArray)
+	return
+end
 
 # ╔═╡ 5762be30-3084-4eda-9642-19dc9d4dcb10
 if !@isdefined(GradientDescent)
@@ -525,7 +556,10 @@ task(md"Define an `Optimisers.apply!` function for `GradientDescent` that
 ")
 
 # ╔═╡ dc4f7f55-dde5-4ee6-b43d-7f64269b55d1
-# Write your code here
+function Optimisers.apply!(alg::GradientDescent, state, params, grad)
+	grad_new = grad * alg.lr
+	return state, grad_new
+end
 
 # ╔═╡ 4eac0e3f-7212-4038-a24e-8d6ca3fbe659
 if !@isdefined(GradientDescent)
@@ -699,17 +733,13 @@ You can write whatever you want in the following string. Feel free to add or del
 
 # ╔═╡ f60be2e0-9b43-46b5-96ef-7747ab56e164
 feedback = """
-The homework took me around XX minutes.
+The homework took me around 50 minutes.
 
 In the lecture / homework I would have liked more detailed explanations on:
-* foo
-* bar
 
 I liked:
-* baz
 
 I didn't like:
-* qux
 """;
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -2211,6 +2241,7 @@ version = "1.4.1+1"
 # ╟─2258b8c6-e8b7-4c06-9ece-53b254db6a2c
 # ╠═3d638561-6760-4260-991a-b0b0c77745a3
 # ╠═aaea0bbf-868d-4fe0-b348-307449d06517
+# ╠═dc1968d4-5367-4dea-ae99-a0ed02418205
 # ╟─80c5a262-e758-4075-896f-a0bc7ce1534c
 # ╠═cf3c52c7-fc5e-4191-be9d-394660385801
 # ╠═e5e014e6-e24d-4de0-a216-61c0f9d9c331
