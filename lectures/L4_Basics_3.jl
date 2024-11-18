@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.1
 
 using Markdown
 using InteractiveUtils
@@ -446,8 +446,33 @@ md"Let's define the same addition operation on all of these points:"
 # ╔═╡ 3e4f26c5-3e3d-4589-8e06-8a1bdda56d76
 md"Addition on all of these structs computes the same correct result:"
 
+# ╔═╡ e3e4925e-5f1e-41ae-a189-e9f56e5e22db
+begin
+    a_notype   = b_notype   = PointNoType(1, 2)
+    a_abstract = b_abstract = PointAbstract(1, 2)
+    a_concrete = b_concrete = PointConcrete(1, 2)
+    a_param    = b_param    = PointParametric(1, 2)
+
+    @info add(a_notype, b_notype)
+    @info add(a_abstract, b_abstract)
+    @info add(a_concrete, b_concrete)
+    @info add(a_param, b_param)
+end
+
 # ╔═╡ 46299f80-60b7-4b1a-b38c-01dd07895acc
 md"But the performance varies a lot:"
+
+# ╔═╡ c1cab48b-3b1e-42ed-8519-98803cd3a864
+@benchmark add(a_notype, b_notype)
+
+# ╔═╡ a6dd3b8a-de4d-491b-9a60-5c5b9d6a7f6a
+@benchmark add(a_abstract, b_abstract)
+
+# ╔═╡ 95f977ae-3d3d-4121-a0d7-94626ebfaaec
+@benchmark add(a_concrete, b_concrete)
+
+# ╔═╡ 37799c0c-82bb-425b-bcf1-f2035b1588cc
+@benchmark add(a_param, b_param)
 
 # ╔═╡ dc0fb8ff-860a-468d-96a5-2f0a3a8780b4
 md"These differences in performance depend on whether Julia can infer the types of the struct fields (here `x` and `y`).
@@ -547,31 +572,6 @@ begin
     add(a::PointConcrete, b::PointConcrete) = PointConcrete(a.x + b.x, a.y + b.y)
     add(a::PointParametric, b::PointParametric) = PointParametric(a.x + b.x, a.y + b.y)
 end
-
-# ╔═╡ e3e4925e-5f1e-41ae-a189-e9f56e5e22db
-begin
-    a_notype   = b_notype   = PointNoType(1, 2)
-    a_abstract = b_abstract = PointAbstract(1, 2)
-    a_concrete = b_concrete = PointConcrete(1, 2)
-    a_param    = b_param    = PointParametric(1, 2)
-
-    @info add(a_notype, b_notype)
-    @info add(a_abstract, b_abstract)
-    @info add(a_concrete, b_concrete)
-    @info add(a_param, b_param)
-end
-
-# ╔═╡ c1cab48b-3b1e-42ed-8519-98803cd3a864
-@benchmark add(a_notype, b_notype)
-
-# ╔═╡ a6dd3b8a-de4d-491b-9a60-5c5b9d6a7f6a
-@benchmark add(a_abstract, b_abstract)
-
-# ╔═╡ 95f977ae-3d3d-4121-a0d7-94626ebfaaec
-@benchmark add(a_concrete, b_concrete)
-
-# ╔═╡ 37799c0c-82bb-425b-bcf1-f2035b1588cc
-@benchmark add(a_param, b_param)
 
 # ╔═╡ d78fabda-bd83-4367-b2a8-e9edddcb658f
 warning_box(

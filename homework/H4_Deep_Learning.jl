@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.1
 
 using Markdown
 using InteractiveUtils
@@ -7,14 +7,7 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     quote
-        local iv = try
-            Base.loaded_modules[Base.PkgId(
-                Base.UUID("6e696c72-6542-2067-7265-42206c756150"),
-                "AbstractPlutoDingetjes",
-            )].Bonds.initial_value
-        catch
-            b -> missing
-        end
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
         el
@@ -61,9 +54,9 @@ md"### Student information"
 
 # ╔═╡ d82c926b-b351-4b5a-80c8-deb31f393e22
 student = (
-    name="Mara Mustermann",
-    email="m.mustermann@campus.tu-berlin.de", # TU Berlin email address
-    id=456123, # Matrikelnummer
+    name="Andreas Paul Bruno Lönne",
+    email="loenne@campus.tu-berlin.de", # TU Berlin email address
+    id=402214, # Matrikelnummer
 )
 
 # ╔═╡ f1d1d8b1-2782-44e1-a2de-40db04bfe7f9
@@ -128,14 +121,8 @@ md"### Exercise 1.2 – Flux models"
 # ╔═╡ 985887e1-0053-4144-b928-928613270084
 md"The following line of code registers your custom layer type for use with Flux models:"
 
-# ╔═╡ 9ca8f33d-ce51-4a5f-9c4b-289696b519c8
-Flux.@functor MyDense # Do NOT change this
-
 # ╔═╡ b8fff122-f50f-4c4f-a1fc-4c78adffdd55
 md"This allows Flux to see the parameters in your layer when calling `Flux.params`."
-
-# ╔═╡ 50b96406-d50d-418f-869d-31d9ad84a234
-model = missing # Define your model here
 
 # ╔═╡ 03cc579b-4b88-410e-8495-b64abc45de38
 md"### Interlude – Loading the Fashion-MNIST dataset
@@ -206,12 +193,6 @@ md"### Exercise 1.3 – Training"
 # ╔═╡ a22aa164-de0d-4e20-85a5-dcec0d12ee43
 md"Run training: $(@bind run_training CheckBox(default=false))"
 
-# ╔═╡ fe22ab4f-6119-4397-ac25-ce840a176777
-if run_training # Do NOT modify this!
-
-	# Write your code here
-end
-
 # ╔═╡ ae26551a-d4dd-4b37-a02d-a089de359f70
 md"### Exercise 1.4 – Evaluation"
 
@@ -228,6 +209,19 @@ Markdown.MD(
         ],
     ),
 )
+
+# ╔═╡ c7316c92-9443-4826-b85b-e7489bb942c0
+function accuracy(model, class=-1)
+    # Use onecold to return class index
+    ŷ = Flux.onecold(model(x_test))
+    y = Flux.onecold(y_test)
+	if class != -1
+		c = ŷ .== class
+		ŷ = ŷ[c]
+		y = y[c]
+	end
+    return mean(ŷ .== y)
+end
 
 # ╔═╡ 67739adb-289c-42cc-a714-bc5f3c25b63b
 md"""## Exercise 2 – Automatic differentiation
@@ -269,10 +263,10 @@ md"### Exercise 2.1 – Operator overloading forward-mode AD"
 # ╔═╡ be88cdff-ab67-4505-9234-82ba9ce977e3
 begin
     # Add these by replacing `missing` with your code
-    Base.:+(f::Dual, g::Dual) = missing
-    Base.:-(f::Dual, g::Dual) = missing
-    Base.:*(f::Dual, g::Dual) = missing
-    Base.:/(f::Dual, g::Dual) = missing
+    Base.:+(f::Dual, g::Dual) = Dual(f.val + g.val, f.der + g.der)
+    Base.:-(f::Dual, g::Dual) = Dual(f.val - g.val, f.der - g.der)
+    Base.:*(f::Dual, g::Dual) = Dual(f.val * g.val, f.der * g.val + f.val * g.der)
+    Base.:/(f::Dual, g::Dual) = Dual(f.val / g.val, (f.der * g.val - g.val * g.der) / (g.der * g.der))
 
     # Don't change these:
     Base.:+(f::Dual, n::Number) = Dual(f.val + n, f.der)
@@ -382,6 +376,122 @@ This corresponds to the quotient rule.
     4,
 )
 
+# ╔═╡ f18b62d5-3a41-44be-ab98-c8895120ca91
+begin
+	struct MyDense
+		weight::AbstractMatrix
+		bias::AbstractVector
+		σ::Function
+		
+		function MyDense(weight::AbstractMatrix, bias::AbstractVector, σ=identity)
+			# check dims
+			if size(weight)[1] != size(bias)[1]
+				throw("weights & biases dimension mismatch! $(size(weight)[1]) != $(size(bias)[1])")
+			end
+			return new(weight, bias, σ)
+		end
+		
+		function (d::MyDense)(x::AbstractArray)
+			return d.σ.(d.weight * x .+ d.bias)
+		end
+	end
+	
+	function MyDense(dims::Pair{Int64, Int64}, σ=identity)
+		bias = zeros(Float32, dims.second)
+		return MyDense(glorot_uniform(dims.second, dims.first), bias)
+	end
+end
+
+# ╔═╡ 9059bb2b-932c-4946-8d16-dfa837d2f1dd
+MyDense(glorot_uniform(5, 3), glorot_uniform(5))
+
+# ╔═╡ da007381-07a6-4e4b-80b1-2305e04fa2fc
+begin
+	D = MyDense(3 => 5)
+	D(ones(3))
+end
+
+# ╔═╡ 9ca8f33d-ce51-4a5f-9c4b-289696b519c8
+Flux.@functor MyDense # Do NOT change this
+
+# ╔═╡ 50b96406-d50d-418f-869d-31d9ad84a234
+model = Chain(
+	Conv((5, 5), 1 => 6, relu),
+	MaxPool((2, 2)),
+	Conv((5, 5), 6 => 16, relu),
+	MaxPool((2, 2)),
+	Flux.flatten,
+	MyDense(256 => 120, relu),
+	MyDense(120 => 84, relu),
+	MyDense(84 => 10),
+	#softmax,
+) # Define your model here
+
+# ╔═╡ 087589ab-36b4-42c3-9c51-8bb9b252049c
+model(x_test)
+
+# ╔═╡ 00dbec98-9c37-441b-9245-cb4a7d59981f
+begin
+	loss_fn(ŷ, y) = Flux.logitcrossentropy(ŷ, y)
+	optim = Flux.setup(Adam(3.0f-6), model)
+	batchsize = 128
+
+	train_loader = Flux.DataLoader((x_train, y_train); batchsize=batchsize, shuffle=true)
+	losses = Float32[]
+end
+
+# ╔═╡ a5e8e151-aa73-4f0a-8b6a-e740ac822e50
+# plot the training loss
+begin
+	num_batches = range(1, size(losses)[1])
+	plot(num_batches, losses)
+	xlabel!("iteration")
+	ylabel!("logit crossentropy error")
+end
+
+# ╔═╡ a8493d5b-bc7d-412b-a2b4-66e081ca14a0
+# determine the class accuracies
+begin
+	class_accuracies = Float32[]
+	for i in range(1, 10)
+		push!(class_accuracies, accuracy(model, i))
+	end
+	class_accuracies
+	best = argmax(class_accuracies)
+	worst = argmin(class_accuracies)
+	@info "Class $best has the highest accuracy: $(class_accuracies[best])%"
+	class_accuracies[best] = -1
+	for i in range(1, 8)
+		best = argmax(class_accuracies)
+		@info "Class $best has accuracy: $(class_accuracies[best])%"
+		class_accuracies[best] = -1
+	end
+	@info "Class $worst has the lowest accuracy: $(class_accuracies[worst])%"
+end
+
+# ╔═╡ fe22ab4f-6119-4397-ac25-ce840a176777
+if run_training # Do NOT modify this!
+
+	# training epochs
+	for epoch in 1:5
+
+		# training batches
+		for (i, (x, y)) in enumerate(train_loader)
+
+			loss, grads = Flux.withgradient(m -> loss_fn(m(x), y), model)
+
+			Flux.update!(optim, model, grads[1])
+
+			push!(losses, loss)
+
+			if isone(i) || iszero(i % 50)
+				acc = accuracy(model) * 100
+				@info "Epoch $epoch, step $i:\t loss = $(loss), acc = $(acc)%"
+			end
+		end
+	end
+end
+
 # ╔═╡ acac68bc-0fc9-4933-a16b-7d1b933ca753
 function Base.sin(d::Dual)
     val = sin(d.val)         # primal output:  ā = sin(a)
@@ -440,14 +550,12 @@ feedback = """
 The homework took me around XX minutes.
 
 In the lecture / homework I would have liked more detailed explanations on:
-* foo
-* bar
 
 I liked:
-* baz
+* The MNIST LeNet5 example.
 
 I didn't like:
-* qux
+* I wasn't sure what test accuracy should be expected from the LeNet5 model and was a little bit confused that the model introduced in the lecture differed from the LeNet 5 architecture I could find online. But this was quickly resolved after I made a forum post.
 """;
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -2454,6 +2562,9 @@ version = "1.4.1+1"
 # ╠═b7943bd4-eeb6-4f1c-91c9-871498c676b6
 # ╟─af7305fa-c2ae-4040-b3c6-658c3b886081
 # ╟─ed505128-7adc-4a4c-a27f-2e1f3229fa14
+# ╠═f18b62d5-3a41-44be-ab98-c8895120ca91
+# ╠═9059bb2b-932c-4946-8d16-dfa837d2f1dd
+# ╠═da007381-07a6-4e4b-80b1-2305e04fa2fc
 # ╟─b06457a9-3574-4c32-b961-7baad0b15eb3
 # ╟─985887e1-0053-4144-b928-928613270084
 # ╠═9ca8f33d-ce51-4a5f-9c4b-289696b519c8
@@ -2472,12 +2583,17 @@ version = "1.4.1+1"
 # ╠═a173003f-9b32-4042-a263-b5af35106587
 # ╠═198492b3-420c-40f6-a72a-dbb7f5a639b5
 # ╠═bc33961c-fa4a-4819-9d81-fc1db8fe87f1
+# ╠═087589ab-36b4-42c3-9c51-8bb9b252049c
 # ╟─45e73981-8631-4851-98a6-b523c2c4b239
 # ╟─0b11ef46-0c80-4255-bb22-23281704916f
+# ╠═00dbec98-9c37-441b-9245-cb4a7d59981f
 # ╟─a22aa164-de0d-4e20-85a5-dcec0d12ee43
 # ╠═fe22ab4f-6119-4397-ac25-ce840a176777
 # ╟─ae26551a-d4dd-4b37-a02d-a089de359f70
 # ╟─207136c1-528f-4f78-84e2-a20f1985092e
+# ╠═c7316c92-9443-4826-b85b-e7489bb942c0
+# ╠═a5e8e151-aa73-4f0a-8b6a-e740ac822e50
+# ╠═a8493d5b-bc7d-412b-a2b4-66e081ca14a0
 # ╟─67739adb-289c-42cc-a714-bc5f3c25b63b
 # ╟─97beac12-3f37-4876-8ae7-b07c2c4975fd
 # ╠═297892b3-5385-4391-a0e8-849cbbff271c
